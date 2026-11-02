@@ -10,5 +10,3 @@ Cómo lo resolví:
 ▪️ Resultados en Sheets, conectados a un dashboard en Looker Studio
 
 Lo que aprendí: automatizar con triggers, validar para no duplicar registros y por qué el promedio simple puede engañar cuando los precios son tan dispares.
-
-🔗 Dashboard y repositorio en los comentarios.
