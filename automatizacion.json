@@ -1,0 +1,196 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo",
+          "mode": "list",
+          "cachedResultName": "2000 filas prueba n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        64
+      ],
+      "id": "c87b9d84-3593-4f3a-b59c-16635517f7be",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "SJ63qXBqnYHFEQQj",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Obtener todas las filas de la planilla\nconst items = $input.all();\n\n// 2. Extraer y limpiar los importes que pagan los afiliados\nconst importes = items.map(item => {\n  let val = item.json['IMPORTE AFILIADO'] || item.json['IMPORTE_num'] || '0';\n  if (typeof val === 'string') {\n    val = val.replace('$', '').replace(/\\./g, '').replace(',', '.').trim();\n  }\n  return parseFloat(val);\n}).filter(v => !isNaN(v));\n\n// 3. Extraer y limpiar los precios de lista (PVP)\nconst pvps = items.map(item => {\n  let val = item.json['PVP PAMI AL 01/10/2026'] || item.json['PVP_num'] || '0';\n  if (typeof val === 'string') {\n    val = val.replace('$', '').replace(/\\./g, '').replace(',', '.').trim();\n  }\n  return parseFloat(val);\n}).filter(v => !isNaN(v));\n\n// 4. Cálculos estadísticos clave\nconst totalRegistros = items.length;\nconst promedioPagar = Math.round(importes.reduce((a, b) => a + b, 0) / (importes.length || 1));\nconst promedioPVP = Math.round(pvps.reduce((a, b) => a + b, 0) / (pvps.length || 1));\nconst ahorroPromedio = promedioPVP - promedioPagar;\n\n// 5. Devolver un objeto consolidado\nreturn [{\n  json: {\n    total_medicamentos: totalRegistros,\n    pvp_promedio: promedioPVP,\n    gasto_promedio_afiliado: promedioPagar,\n    ahorro_promedio_pami: ahorroPromedio,\n    fecha_reporte: new Date().toLocaleDateString('es-AR')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        64
+      ],
+      "id": "0fd3c6ba-14c1-4612-9238-68bee752fcb2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo",
+          "mode": "list",
+          "cachedResultName": "2000 filas prueba n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1925605181,
+          "mode": "list",
+          "cachedResultName": "Historico_Reportes",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1au3-CyhHNy8_IhG9_LqQBoMHLjxJUa5cB5Ue2RBAzYo/edit#gid=1925605181"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Fecha": "={{ $json.fecha_reporte }}",
+            "Total_Medicamentos": "={{ $json.total_medicamentos }}",
+            "PVP_Promedio": "={{ $json.pvp_promedio }}",
+            "Gasto_Promedio_Afiliado": "={{ $json.gasto_promedio_afiliado }}",
+            "Ahorro_Promedio": "={{ $json.ahorro_promedio_pami }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Fecha",
+              "displayName": "Fecha",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total_Medicamentos",
+              "displayName": "Total_Medicamentos",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "PVP_Promedio",
+              "displayName": "PVP_Promedio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gasto_Promedio_Afiliado",
+              "displayName": "Gasto_Promedio_Afiliado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Ahorro_Promedio",
+              "displayName": "Ahorro_Promedio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        240,
+        64
+      ],
+      "id": "17d9ba98-918e-4163-aa30-d7c4414cbafc",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GaDntl1PsCqk8BD1",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "c7a02fa6-8137-432b-9eea-1e29d5285ed8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4fc23a8b1ce2e44eb88583037f1c70da98087aa9e3bb6e7eff6bc74f8f0317a8"
+  },
+  "nodeGroups": [],
+  "id": "ug5tq46knVscNzFg",
+  "tags": []
+}
